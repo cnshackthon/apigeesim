@@ -1,0 +1,578 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: todd.levi@nokia.com
+    name: Nokia NaC Support Team
+  description: Manipulate network conditions via simplified REST calls
+  title: Network as Code
+  version: "2"
+servers:
+- description: Development/Test server for Network as Code
+  url: https://apigee-api-test.nokia-solution.com/nac/v2
+security:
+- apigee_apikey: []
+paths:
+  /hello:
+    description: Administrative API endpoints
+    get:
+      description: Used to determine if the API is currently accessible
+      operationId: getApiStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelloResponses'
+          description: API is available
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Is API accessible
+      tags:
+      - admin
+    summary: Admin API
+  /subscriber:
+    description: Get the SUPI/IMSI and MSISDN for the given External ID
+    post:
+      operationId: getSubscriber
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberId'
+        description: External ID of the subscriber
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberDetails'
+          description: Subscriber information
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Get the subscriber SUPI/IMSI and MSISDN
+      tags:
+      - subscriber
+    summary: Get information for the given External ID
+  /subscriber/bandwidth:
+    description: Get/update the bandwidth for a subscriber identified by the given
+      IMSI
+    patch:
+      description: Update the bandwidth identifier for the subscriber identified by
+        the given IMSI
+      operationId: updateSubscriberBandwidth
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BandwidthUpdate'
+        description: New bandwidth for subscriber
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BandwidthResponse'
+          description: Bandwidth updated
+        "400":
+          content:
+            application/json:
+              example:
+                error: invalid bandwidth specified
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad bandwidth
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Update the bandwidth of the subscriber
+      tags:
+      - subscriber
+      - bandwidth
+    post:
+      description: Get the bandwidth identifier for the subscriber identified by the
+        given IMSI
+      operationId: getSubscriberBandwidth
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberId'
+        description: External ID of the subscriber
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BandwidthResponse'
+          description: Current bandwidth
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Get the current subscriber bandwidth
+      tags:
+      - subscriber
+      - bandwidth
+    summary: Bandwidth for a subscriber identified by the given IMSI
+  /subscriber/bandwidth/custom:
+    description: Retrieve/update the custom upload/download bandwidth limits for a
+      subscriber
+    patch:
+      description: Set the upload/download bandwidth limits for the subscriber identified
+        by the given ID
+      operationId: updateCustomBandwidth
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomLimits'
+        description: New upload/download limits for the subscriber
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLimits'
+          description: Updated custom limits
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Set upload limit
+      tags:
+      - subscriber
+      - bandwidth
+    post:
+      description: Get the current upload/download bandwidth limits for the subscriber
+        identified by the given ID
+      operationId: getCustomBandwidth
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberId'
+        description: External ID of the subscriber
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLimits'
+          description: Subscriber custom limits
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Get upload/download limit
+      tags:
+      - subscriber
+      - bandwidth
+    summary: Custom subscriber bandwidth limits
+  /subscriber/location:
+    description: Retrieve the last reported location of the subscriber identified
+      by the given ID
+    post:
+      description: Get the last reported location of the subscriber identified by
+        the given ID
+      operationId: getSubscriberLocation
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberId'
+        description: External ID of the subscriber
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationResponse'
+          description: Subscriber location
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Get last reported location
+      tags:
+      - subscriber
+      - location
+    summary: Last reported location
+  /subscriber/testuser:
+    delete:
+      operationId: deleteTestuser
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberId'
+        description: External ID of the subscriber
+        required: true
+      responses:
+        "204":
+          description: User deleted
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Delete an existing test user
+      tags:
+      - subscriber
+      - admin
+    description: Add or delete a test user
+    put:
+      operationId: createTestUser
+      parameters:
+      - description: Enables test mode when set to "true".  Assumes "false" if not
+          present.
+        explode: false
+        in: header
+        name: x-testmode
+        required: false
+        schema:
+          enum:
+          - "true"
+          - "false"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberDetails'
+        description: Add a new test user
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberDetails'
+          description: User created
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: API Error
+      summary: Create a new test user
+      tags:
+      - subscriber
+      - admin
+    summary: Test user management
+components:
+  parameters:
+    TestMode:
+      description: Enables test mode when set to "true".  Assumes "false" if not present.
+      explode: false
+      in: header
+      name: x-testmode
+      required: false
+      schema:
+        enum:
+        - "true"
+        - "false"
+        type: string
+      style: simple
+  responses:
+    APIError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+      description: API Error
+    BadBandwidth:
+      content:
+        application/json:
+          example:
+            error: invalid bandwidth specified
+          schema:
+            $ref: '#/components/schemas/ApiError'
+      description: Bad bandwidth
+  schemas:
+    Id:
+      format: uuid
+      maxLength: 36
+      type: string
+    MSISDN:
+      pattern: /^[1-9][0-9]{10,14}$/
+      type: string
+    IMSI:
+      pattern: /^[1-9][0-9]{14,16}$/
+      type: string
+    ExternalId:
+      example: test.user@domain.tld
+      format: email
+      maxLength: 256
+      pattern: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+      type: string
+    SubscriberId:
+      example:
+        id: test.user@domain.tld
+      properties:
+        id:
+          example: test.user@domain.tld
+          format: email
+          maxLength: 256
+          pattern: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+          type: string
+      required:
+      - id
+      type: object
+    Bandwidth:
+      enum:
+      - uav_streaming
+      - uav_lowpowermode
+      example: uav_lowpowermode
+      type: string
+    BandwidthUpdate:
+      example:
+        bandwidth: uav_lowpowermode
+        id: test.user@domain.tld
+      properties:
+        id:
+          example: test.user@domain.tld
+          format: email
+          maxLength: 256
+          pattern: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+          type: string
+        bandwidth:
+          $ref: '#/components/schemas/Bandwidth'
+      type: object
+    HelloResponses:
+      additionalProperties: false
+      example:
+        service: up
+      properties:
+        service:
+          enum:
+          - up
+          - down
+          type: string
+      type: object
+    SubscriberDetails:
+      additionalProperties: false
+      example:
+        id: foo.bar@domain.tld
+        imsi: "123456789012345"
+        msisdn: "1234567890"
+      properties:
+        id:
+          example: test.user@domain.tld
+          format: email
+          maxLength: 256
+          pattern: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+          type: string
+        imsi:
+          pattern: /^[1-9][0-9]{14,16}$/
+          type: string
+        msisdn:
+          pattern: /^[1-9][0-9]{10,14}$/
+          type: string
+      type: object
+    BandwidthResponse:
+      allOf:
+      - $ref: '#/components/schemas/SubscriberId'
+      - $ref: '#/components/schemas/Bandwidth'
+      example:
+        id: foo.bar@domain.tld
+        bandwidth: uav_lowpowermode
+      type: object
+    LocationDetails:
+      example:
+        ageOfLocationInfo: "150"
+        trackingAreaId: 1234567890AB
+        plmnId: "001001"
+        lat: "0.0"
+        long: "0.0"
+        elev: "123"
+      properties:
+        ageOfLocationInfo:
+          pattern: /^[0-9]+$/
+          type: string
+        trackingAreaId:
+          type: string
+        plmnId:
+          pattern: /^[0-9]+$/
+          type: string
+        lat:
+          type: string
+        long:
+          type: string
+        elev:
+          type: string
+      type: object
+    LocationResponse:
+      example:
+        locationInfo:
+          ageOfLocationInfo: "150"
+          trackingAreaId: 1234567890AB
+          plmnId: "001001"
+          lat: "0.0"
+          long: "0.0"
+          elev: "123"
+        eventTime: 2000-01-23T04:56:07.000+00:00
+        id: test.user@domain.tld
+      properties:
+        eventTime:
+          format: date-time
+          type: string
+        id:
+          example: test.user@domain.tld
+          format: email
+          maxLength: 256
+          pattern: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+          type: string
+        locationInfo:
+          $ref: '#/components/schemas/LocationDetails'
+      type: object
+    CustomLimits:
+      example:
+        id: foo.bar@domain.tld
+        upload: 1024000
+        download: 4096000
+      properties:
+        id:
+          example: test.user@domain.tld
+          format: email
+          maxLength: 256
+          pattern: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+          type: string
+        upload:
+          description: Upload limit in bits per second
+          type: integer
+        download:
+          description: Download limit in bits per second
+          type: integer
+      type: object
+    ApiError:
+      example:
+        error: invalid foo - check your bar
+      properties:
+        error:
+          maxLength: 256
+          type: string
+      type: object
+  securitySchemes:
+    apigee_apikey:
+      description: API Key for your Apigee App
+      in: header
+      name: x-apikey
+      type: apiKey
